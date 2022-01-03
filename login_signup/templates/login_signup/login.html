@@ -1,0 +1,136 @@
+{% extends 'login_signup/login_signup_base.html' %}
+
+{% load static %}
+
+{% block body %}
+
+    <script src="{% static 'assets/js/token/token.js' %}"></script>
+
+    <main class="login-body" data-vide-bg="{% static 'assets/img/login-bg.mp4' %}">
+        <!-- Login Admin -->
+        <form class="form-default" id="form_wrapper">
+
+            <div class="login-form">
+                <!-- logo-login -->
+                <div class="logo-login">
+                    <a href="{% url 'home' %}"><img src="{% static 'assets/img/logo/loder.png' %}" alt=""></a>
+                </div>
+                <h2>Login Here</h2>
+                <div class="form-input">
+                    <label for="name">Email</label>
+                    <input type="email" name="email" placeholder="Email" id="email" required>
+
+                </div>
+                <div class="form-input">
+                    <label for="name">Password</label>
+                    <input type="password" name="password" placeholder="Password" id="password" required>
+                </div>
+                <div class="form-input pt-30">
+                    <input type="submit" name="submit" value="login" id="login_btn">
+                </div>
+
+
+                <!-- Create new user -->
+                <a href="{% url 'signup' %}" style="margin-left: 38%; margin-top: 5%;" class="registration">Registration</a>
+            </div>
+        </form>
+        <!-- /end login form -->
+    </main>
+
+
+
+    <script type="text/javascript">
+
+
+        $(document).ready(function () {
+
+
+            var csrftoken = getToken('csrftoken');			/* csrftoken yesari generate garera variable ma holda garayera rakheko cha,,, getToken() vanni csrf token generate garni auta django le diyeko method ho.. yo django ko documentation ma diyeko cha ... tesailai copy paste gareko*/
+            {#console.log('token:' + csrftoken)#}
+
+
+            var form = document.getElementById('form_wrapper')		/* from-wrapper vanni element lai get gareko */
+
+            /* hamro form submission garne kaam javascript le handle gari rako cha.. not by the django */
+            form.addEventListener('submit', function (e)		                 /* form ko submit ma kasaile click gareko cha vani, yo talako definition part run hune*/ {
+                e.preventDefault()                                           /* yo code le chai form automatic submit huna prevent garcha ... i.e prevent form from submitting on it's own ... generally form ko submit ma click garyo vani form submit hune kaam hunthyo,,, but tyo kam hamile javscript batw handle garna lagi rako chau */
+
+                var email = document.getElementById('email').value
+                var password = document.getElementById('password').value
+
+
+                var url = "{% url 'token_obtain_pair' %}"			                                /* fetch API call garne wala url lai yesari js variable ma hold garera rakheko*/
+
+                /* Fetch API Call to the url */
+                fetch(url, {
+                    method: 'POST',				                                            /* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                    headers: {
+                        Authorization: localStorage.getItem('access_token')
+                            ? 'JWT ' + localStorage.getItem('access_token')
+                            : null,
+
+                        'Content-type': 'application/json',
+                        'X-CSRFToken': csrftoken,			                                                 /* yo form batw csrf token pani pathaucha ,,,, csrftoken chai mathi top tira generate gareko cha... getToken() vanni function le generate gareko cha */
+                    },
+                    body: JSON.stringify({
+                        'email': email,
+                        'password': password,
+                    })			                                                                            /* yesarri body ma json object vitra key value pair(i.e 'title':title) pani pathako cha*/
+
+                }).then((resp) => resp.json())
+                    .then(function (res)		                                                        /* django ko taskCreate() vanni view le response pathaye pachi yo function call huncha*/ {
+
+                        localStorage.setItem('access_token', res.access);
+                        localStorage.setItem('refresh_token', res.refresh);
+
+
+                        document.getElementById('form_wrapper').reset()			                            /* JS ko  .reset() method will just clear out our form ma haleko display vai rakheko data */
+                        {#window.location.replace("{% url 'blog' %}");#}
+
+                        setAuthorization()
+                    })
+
+            })
+
+            function setAuthorization()
+            {
+
+                var urls = "{% url 'list_post' %}"			                                /* fetch API call garne wala url lai yesari js variable ma hold garera rakheko*/
+
+                /* Fetch API Call to the url */
+                fetch(urls, {
+                    method: 'GET',				                                            /* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                    headers: {
+                        Authorization: localStorage.getItem('access_token')
+                            ? 'JWT ' + localStorage.getItem('access_token')
+                            : null,
+
+
+                        'Accept': 'application/json',
+                        'X-CSRFToken': csrftoken,			                                                 /* yo form batw csrf token pani pathaucha ,,,, csrftoken chai mathi top tira generate gareko cha... getToken() vanni function le generate gareko cha */
+                    },
+                })
+                    .then(function (response)		                                                        /* django ko taskCreate() vanni view le response pathaye pachi yo function call huncha*/ {
+
+                        if (parseInt(response.status) == 200) {
+                            if (localStorage.getItem('access_token') == 'undefined') {
+
+                                window.location.replace("{% url 'login' %}")
+                            } else {
+                                window.location.replace("{% url 'blog' %}")
+
+                            }
+                        } else {
+                            window.location.replace("{% url 'login' %}");
+
+                        }
+                    })
+
+
+            }
+        })
+    </script>
+
+
+{% endblock %}
+

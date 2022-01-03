@@ -1,0 +1,105 @@
+{% extends 'login_signup/login_signup_base.html' %}
+{% load static %}
+
+
+{% block body %}
+
+    <script src="{% static 'assets/js/token/token.js' %}"></script>
+
+    <!-- Register -->
+    <main class="login-body" data-vide-bg="{% static 'assets/img/login-bg.mp4' %}">
+        <!-- Login Admin -->
+        <form class="form-default" id="form_wrapper">
+
+            <div class="login-form">
+                <!-- logo-login -->
+                <div class="logo-login">
+                    <a href="{% url 'home' %}"><img src="{% static 'assets/img/logo/loder.png' %}" alt=""></a>
+                </div>
+                <h2>Registration Here</h2>
+
+                <div class="form-input">
+                    <label for="name">Username</label>
+                    <input type="text" name="user_name" id="user_name" required>
+                </div>
+
+                <div class="form-input">
+                    <label for="name">Email Address</label>
+                    <input type="email" name="email" id="email" required>
+                </div>
+
+                <div class="form-input">
+                    <label for="name">Password</label>
+                    <input type="password" name="password" id="password" required>
+                </div>
+
+                <div class="form-input">
+                    <label for="name">Confirm Password</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required>
+                </div>
+
+                <div class="form-input pt-30">
+                    <input type="submit" id="submit" name="submit" value="Registration">
+                </div>
+                <!-- Forget Password -->
+                <a href="{% url 'login' %}" style="margin-left: 43%;" class="registration">login</a>
+            </div>
+        </form>
+        <!-- /end login form -->
+    </main>
+
+
+
+    <script type="text/javascript">
+
+        var csrftoken = getToken('csrftoken');			/* csrftoken yesari generate garera variable ma holda garayera rakheko cha,,, getToken() vanni csrf token generate garni auta django le diyeko method ho.. yo django ko documentation ma diyeko cha ... tesailai copy paste gareko*/
+        console.log('token:' + csrftoken)
+
+
+        var form = document.getElementById('form_wrapper')		/* from-wrapper vanni element lai get gareko */
+
+        /* hamro form submission garne kaam javascript le handle gari rako cha.. not by the django */
+        form.addEventListener('submit', function (e)		                 /* form ko submit ma kasaile click gareko cha vani, yo talako definition part run hune*/ {
+            e.preventDefault()                                           /* yo code le chai form automatic submit huna prevent garcha ... i.e prevent form from submitting on it's own ... generally form ko submit ma click garyo vani form submit hune kaam hunthyo,,, but tyo kam hamile javscript batw handle garna lagi rako chau */
+
+            var user_name = document.getElementById('user_name').value		/* user_name vanni element lai get gareko */
+            var email = document.getElementById('email').value
+            var password = document.getElementById('password').value
+            var confirm_password = document.getElementById('confirm_password').value
+
+            if (password.trim() === '' || confirm_password.trim() === '' || password != confirm_password)
+            {
+                alert('password error')
+            }
+            else
+            {
+                var url = "{% url 'users:create_user' %}"			 //yaha 'users:create_user' gareko cha becz users app ko urls.py ma app_name = 'users' diyeko cha ...yesari app name diyo vani yesari ---> users:create_user dina parcha.
+
+                /* Fetch API Call to the url */
+                fetch(url, {
+                    method: 'POST',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                    headers: {
+                        'Content-type': 'application/json',
+                        {#'Content-type': 'multipart/form-data',#}
+                        'X-CSRFToken': csrftoken,			/* yo form batw csrf token pani pathaucha ,,,, csrftoken chai mathi top tira generate gareko cha... getToken() vanni function le generate gareko cha */
+                    },
+                    body: JSON.stringify({
+                        'user_name': user_name,
+                        'email': email,
+                        'password': password,
+                        'confirm_password': confirm_password
+                     })			/* yesarri body ma json object vitra key value pair(i.e 'title':title) pani pathako cha*/
+
+                   // body: new FormData(form_wrapper)
+                })
+                    .then(function (response)		/* django ko taskCreate() vanni view le response pathaye pachi yo function call huncha*/
+                    {
+
+                        document.getElementById('form_wrapper').reset()			/* JS ko  .reset() method will just clear out our form ma haleko display vai rakheko data */
+                        window.location.replace("{% url 'login' %}");
+                    })
+            }
+        })
+
+    </script>
+{% endblock %}

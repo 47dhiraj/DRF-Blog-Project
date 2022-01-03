@@ -1,0 +1,260 @@
+{% extends 'home/base.html' %}
+
+{% load static %}
+
+{% block body %}
+    <script type="text/javascript">
+
+        // To get authenticated user
+        $(document).ready(function ()
+        {
+            var url = "{% url 'get_user' %}"			/* fetch API call garne wala url lai yesari js variable ma hold garera rakheko*/
+
+            /* Fetch API Call to the url */
+            fetch(url, {
+                method: 'GET',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                headers: {
+                    Authorization: localStorage.getItem('access_token')
+                        ? 'JWT ' + localStorage.getItem('access_token')
+                        : null,
+                },
+
+
+            })
+                .then((response) => {                                                          /* Response(in json) and stauts lyauni tarika */
+                status = response.status;
+                return response.json()
+            })
+                .then(function (data)
+                {
+                    if (parseInt(status) == 200)
+                    {
+
+                    }
+                    else
+                    {
+                        window.location.replace("{% url 'home' %}")
+                    }
+
+
+                })
+        })
+    </script>
+
+
+    <script src="{% static 'assets/js/token/token.js' %}"></script>
+
+    <style>
+        .single-textarea {
+            resize: vertical;
+        }
+    </style>
+
+    <main>
+        <!--? slider Area Start-->
+        <section class="slider-area slider-area2">
+            <div class="slider-active">
+                <!-- Single Slider -->
+                <div class="single-slider slider-height2">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-8 col-lg-11 col-md-12">
+                                <div class="hero__caption hero__caption2">
+                                    <h1 data-animation="bounceIn" data-delay="0.2s">Add Blog</h1>
+                                    <!-- breadcrumb Start-->
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                                            <li class="breadcrumb-item"><a href="{% url 'add_blog' %}">Add Blog</a></li>
+                                        </ol>
+                                    </nav>
+                                    <!-- breadcrumb End -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!--? Start Align Area -->
+        <div class="whole-wrap">
+            <div class="container box_1170">
+                <div class="section-top-border">
+                    <div class="row">
+                        <div class="col-lg-12 col-md-12">
+                            <h3 class="mb-30">Blog Adding Form</h3>
+
+                            <form id="add_blog_form" enctype="multipart/form-data">
+                                <div class="input-group-icon mt-10">
+                                    <div class="icon"><i class="fa fa-list" aria-hidden="true"></i></div>
+                                    <div class="form-select">
+
+
+                                        <select id="category" name="category" required>
+                                            {% for category in categories %}
+                                                <option value="{{ category.id }}">{{ category.name }}</option>
+                                            {% endfor %}
+
+
+                                        </select>
+
+
+                                    </div>
+                                </div>
+
+                                <div class="input-group-icon mt-30">
+                                    <div class="icon"><i class="fa fa-paper-plane" aria-hidden="true"></i></div>
+
+                                    <input type="text" name="title" placeholder="Blog Title" id="title"
+                                           onfocus="this.placeholder = ''" onblur="this.placeholder = 'Blog Title'"
+                                           required
+                                           class="single-input">
+                                </div>
+
+
+                                <div class="input-group-icon mt-30">
+
+                                    <input type="text" name="author" placeholder="Author" id="author"
+                                           onfocus="this.placeholder = ''" onblur="this.placeholder = 'Author'"
+                                           required
+                                           class="single-input" hidden>
+                                </div>
+
+
+                                <div class="input-group-icon mt-30">
+
+                                    <input type="text" name="slug" placeholder="Slug" id="slug"
+                                           onfocus="this.placeholder = ''" onblur="this.placeholder = 'Slug'"
+                                           required
+                                           class="single-input" hidden>
+                                </div>
+
+
+                                <div class="mt-30">
+                                        <textarea class="single-textarea" placeholder="Excerpt" name="excerpt"
+                                                  id="excerpt"
+                                                  onfocus="this.placeholder = ''"
+                                                  onblur="this.placeholder = 'Excerpt'" required></textarea>
+                                </div>
+
+
+                                <div class="mt-30">
+                                        <textarea class="single-textarea" placeholder="Content" name="content"
+                                                  id="content"
+                                                  onfocus="this.placeholder = ''"
+                                                  onblur="this.placeholder = 'Content'" required></textarea>
+                                </div>
+
+
+                                <div class="input-group-icon mt-30">
+                                    <div class="icon"><i class="fa fa-envelope" aria-hidden="true"></i></div>
+                                    <div class="form-select">
+                                        <select id="status" name="status" required>
+                                            <option value="" selected disabled hidden>Choose Status</option>
+                                            <option value="draft">Draft</option>
+                                            <option value="published">Published</option>
+
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="mt-30">
+                                    <input type="file" id="image" name="image" accept="image/*">
+
+                                    <input class="btn float-right" type="submit" name="submit" id="submit"
+                                           value="Add Blog">
+
+                                </div>
+
+
+                            </form>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <!-- End Align Area -->
+    </main>
+
+
+    <script type="text/javascript">
+
+
+        var csrftoken = getToken('csrftoken');			/* csrftoken yesari generate garera variable ma holda garayera rakheko cha,,, getToken() vanni csrf token generate garni auta django le diyeko method ho.. yo django ko documentation ma diyeko cha ... tesailai copy paste gareko*/
+
+        var category = "";
+        var status = "";
+
+        // To generate slug title automatically with including '-'
+        $(document).ready(function () {
+
+            $("#title").on('keyup', function () {
+                var slug_title = document.getElementById("title").value
+
+                /* Example-1 to make slug in advanced way */
+                function convertToSlug(Text) {
+                    return Text
+                        .toLowerCase()
+                        .replace(/[^\w ]+/g, '')
+                        .replace(/ +/g, '-')
+                        ;
+                }
+
+                var slugified_title = convertToSlug(slug_title)
+                $('#slug').val(slugified_title)
+
+
+            })
+
+            // To Find the selected value of the category
+
+            $("#category").on('change', function () {
+                category = document.getElementById("category").value
+            })
+
+            // To Find the selected value of the status
+            $("#status").on('change', function () {
+                status = document.getElementById("status").value
+            })
+
+        });
+
+
+        var form = document.getElementById('add_blog_form')
+
+        /* hamro form submission garne kaam javascript le handle gari rako cha.. not by the django */
+        form.addEventListener('submit', function (e)		                 /* form ko submit ma kasaile click gareko cha vani, yo talako definition part run hune*/ {
+            e.preventDefault()                                           /* yo code le chai form automatic submit huna prevent garcha ... i.e prevent form from submitting on it's own ... generally form ko submit ma click garyo vani form submit hune kaam hunthyo,,, but tyo kam hamile javscript batw handle garna lagi rako chau */
+
+
+            var url = "{% url 'create_post' %}"			/* fetch API call garne wala url lai yesari js variable ma hold garera rakheko*/
+
+            /* Fetch API Call to the url */
+            fetch(url, {
+                method: 'POST',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                headers: {
+                    Authorization: localStorage.getItem('access_token')
+                        ? 'JWT ' + localStorage.getItem('access_token')
+                        : null,
+                    'X-CSRFToken': csrftoken,			/* yo form batw csrf token pani pathaucha ,,,, csrftoken chai mathi top tira generate gareko cha... getToken() vanni function le generate gareko cha */
+                },
+                body: new FormData(add_blog_form)
+
+            }).then(function (response)		                  /* django ko taskCreate() vanni view le response pathaye pachi yo function call huncha*/ {
+
+                document.getElementById('add_blog_form').reset()		/* JS ko  .reset() method will just clear out our form ma haleko display vai rakheko data */
+                window.location.replace("{% url 'blog' %}")
+            })
+
+
+        })
+
+
+    </script>
+
+{% endblock %}

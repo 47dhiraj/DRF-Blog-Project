@@ -1,0 +1,454 @@
+{% extends 'home/base.html' %}
+
+{% load static %}
+
+
+
+{% block body %}
+    <style>
+
+        .my_container {
+            width: 100%;
+            padding-left: 100px;
+
+        }
+
+        .section-tittle h2 {
+            padding-top: 20px;
+            padding-left: 200px;
+        }
+
+        .search-bar {
+            padding-top: 20px;
+
+            padding-right: 46px;
+        }
+
+
+        @media (max-width: 576px) {
+            .my_container {
+                width: 100%;
+                padding-left: 20px;
+            }
+
+            .section-tittle h2 {
+                padding-left: 100px;
+                margin-bottom: 0;
+                margin-right: 100px;
+            }
+
+            .search-bar {
+                padding-right: 0;
+            }
+
+            .flex-child {
+                flex: 1;
+                margin-right: 42px;
+            }
+
+        }
+
+        @media (min-width: 768px) {
+            .my_container {
+                max-width: 720px
+            }
+        }
+
+        @media (min-width: 992px) {
+            .my_container {
+                max-width: 960px
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .my_container {
+                max-width: 95%;
+
+            }
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+            flex-direction: row;
+
+        }
+
+        .flex-child {
+            flex: 1;
+
+        }
+
+
+    </style>
+    <!-- Header End -->
+    <main>
+        <!--? slider Area Start-->
+        <section class="slider-area slider-area2">
+            <div class="slider-active">
+                <!-- Single Slider -->
+                <div class="single-slider slider-height2">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-8 col-lg-11 col-md-12">
+                                <div class="hero__caption hero__caption2">
+                                    <h1 data-animation="bounceIn" data-delay="0.2s">Blogs</h1>
+                                    <!-- breadcrumb Start-->
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                                            <li class="breadcrumb-item"><a href="{% url 'blog' %}">Blog</a></li>
+                                        </ol>
+                                    </nav>
+                                    <!-- breadcrumb End -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--? Blog Area Start-->
+
+        <!-- Courses area start -->
+        <div class="courses-area fix">
+
+            <div class="my_container">
+
+                <div class="row justify-content-center">
+                    <div class="col-xl-12 col-lg-12 flex-container">
+
+                        <div class="col-xl-9 section-tittle text-center mb-55 flex-child">
+                            <h2>Blogs</h2>
+                        </div>
+
+
+                        <div class="col-xl-3 blog_right_sidebar flex-child search-bar">
+                            <aside class="single_sidebar_widget search_widget p-0">
+
+                                <form id="search_form">
+
+                                    <div class="form-group">
+                                        <div class="input-group mb-3">
+
+                                            <input type="text" class="form-control" id="searchField"
+                                                   placeholder='Search Keyword'
+                                                   onfocus="this.placeholder = ''"
+                                                   onblur="this.placeholder = 'Search Keyword'">
+                                            <div class="input-group-append">
+                                                <button class="btns">
+                                                    <i class="ti-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </aside>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+                <div class="courses-actives flex-container" id="search-wrapper">
+
+
+                </div>
+
+
+                <div class="courses-actives flex-container" id="list-wrapper">
+
+
+                </div>
+
+
+                <div style="margin-left: 40%" class="flex-container" id="pagination_div">
+
+                    <div style="margin-top: 5px;">
+                        <button class="btn btn-info btn-sm" style="padding: 12px 9px !important;"
+                                onclick="prevFunction()">Prev
+                        </button>
+                    </div>
+
+
+                    <div id="pagination_anchor">
+
+                    </div>
+
+
+                    <div style="margin-top: 5px;">
+
+                        <button class="btn btn-info btn-sm" style="margin-left: 1%; padding: 12px 6px !important;"
+                                onclick="nextFunction()">Next
+                        </button>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+        </div>
+        <!-- Courses area End -->
+
+
+    </main>
+
+
+
+    <!-- Script For All Blog List -->
+    <script type="text/javascript">
+
+
+        $(document).ready(function ()
+        {
+            var current_page = 1
+            var total_pages = 0
+
+            getDataPageWise(1)
+
+            window.myFunction = function (page_number)
+            {
+                current_page = page_number
+                getDataPageWise(current_page)
+            };
+
+            window.prevFunction = function ()
+            {
+                if (current_page > 1)
+                {
+                    current_page = current_page - 1
+                    getDataPageWise(current_page)
+                }
+
+            }
+
+
+            window.nextFunction = function ()
+            {
+                if (current_page < total_pages)
+                {
+                    current_page = current_page + 1
+
+                    getDataPageWise(current_page)
+                }
+
+            }
+
+
+
+            function getDataPageWise(page_number)
+            {
+                const size = 8
+                var count = 0
+
+
+                var url = "{% url 'list_post' %}" + "?page=" + page_number	        /* fetch API call garni wala URL declare gareko */
+
+
+                /* Fetch API Call to the url */
+                fetch(url,
+                    {
+                        method: 'GET',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                        headers: {
+                            Authorization: localStorage.getItem('access_token')
+                                ? 'JWT ' + localStorage.getItem('access_token')
+                                : null,
+
+                            'Content-type': 'application/json',
+                        },
+
+                    })
+                    .then((response) => {                                                          /* Response(in json) and stauts lyauni tarika */
+                        status = response.status;
+                        return response.json()
+                    })
+                    .then(function (data) {
+                        var codeblock = ''
+                        var pageblock = ''
+
+
+                        if (parseInt(status) == 200)
+                        {
+                            count = data.count
+                            total_pages = Math.ceil(count / size)
+
+                            if (total_pages <= 0)
+                            {
+                                $('#pagination_div').css('visibility', 'hidden')
+                            }
+                            else
+                            {
+                                $('#pagination_div').css('visibility', 'visible')
+                            }
+
+                            var list = data.results                        /* PageNumberPagination use garera response ma data aunda(results array ma ayeko huncha) so 'data.results[0].title' gareko  */
+
+
+                            for (var i in list)			/* browser ma vayeko JSON object lai loop lagako */
+                            {
+
+                                var id = parseInt(list[i].id)
+                                var treamed_title = list[i].title.split(' ').slice(0, 4).join(' ')
+                                var treamed_excerpt = list[i].excerpt.split(' ').slice(0, 4).join(' ')
+
+                                var item = `<div class="properties pb-20">
+                                                <div class="properties__card" style="max-width: 290px">
+                                                        <div class="properties__img overlay1">
+                                                            <a href="/blog_detail/${list[i].id}/"><img src="${list[i].image}" alt="" style="height:175px; width: 290px;"></a>
+                                                        </div>
+                                                        <div class="properties__caption">
+
+
+                                                            <h3><a href="#">${treamed_title}</a></h3>
+
+                                                            <p>${treamed_excerpt}... </p>
+
+
+                                                            <a href="/blog_detail/${list[i].id}/" class="border-btn border-btn2" id="view_detail">View Detail</a>
+                                                        </div>
+
+                                                </div>
+                                            </div>
+
+                                        `
+
+                                codeblock += item
+                                document.getElementById('list-wrapper').innerHTML = codeblock
+                            }
+
+
+                            // Integer wala for loop
+                            for (var i = 1; i <= total_pages; i++)
+                            {
+                                var page_item = `<a style="padding-right: 10px; font-size: 25px; color: dodgerblue; cursor:pointer;" onclick="myFunction(${i})">${i}</a>`
+                                pageblock += page_item
+                                document.getElementById('pagination_anchor').innerHTML = pageblock
+
+                            }
+
+                        }
+                        else
+                        {
+                            window.location.replace("{% url 'home' %}")
+                        }
+                    })
+
+
+            }
+
+
+        });
+
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- For Search Functionality -->
+    <script>
+        $(document).ready(function () {
+
+            const searchField = document.querySelector("#searchField");
+
+
+            searchField.addEventListener('input', (e) => {
+
+                const searchValue = document.querySelector("#searchField").value;
+
+
+                var codeBlock = ``;
+
+
+                if (searchValue.trim().length >= 1)
+                {
+                    document.getElementById("search-wrapper").style.visibility = "visible";
+                    var url = "{% url 'search_post' %}" + '?search=' + searchValue		/* fetch API call garni wala URL declare gareko */
+
+
+                    /* Fetch API Call to the url */
+                    fetch(url,
+                        {
+                            method: 'GET',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                            headers: {
+                                Authorization: localStorage.getItem('access_token')
+                                    ? 'JWT ' + localStorage.getItem('access_token')
+                                    : null,
+                                'Content-type': 'application/json',
+                            },
+
+                        }).then((response) => {                                                          /* Response(in json) and stauts lyauni tarika */
+                        status = response.status;
+                        return response.json()
+                    })
+                        .then(function (data)
+                        {
+
+                            if (parseInt(status) == 200) {
+                                if (data.length != 0) {
+                                    document.getElementById("list-wrapper").style.visibility = "hidden";
+
+                                    var list = data                 /* list vanni js variable, yo variable ms chai JSON Object format ko data cha*/
+
+                                    for (var i in list)			/* browser ma vayeko JSON object lai loop lagako */
+                                    {
+
+                                        var id = parseInt(list[i].id)
+                                        var treamed_title = list[i].title.split(' ').slice(0, 4).join(' ')
+                                        var treamed_excerpt = list[i].excerpt.split(' ').slice(0, 4).join(' ')
+
+                                        var item = `<div class="properties pb-5">
+                                            <div class="properties__card" style="max-width: 150px">
+                                                <div class="properties__img overlay1">
+                                                    <a href="/blog_detail/${list[i].id}/"><img src="${list[i].image}" alt="" style="height: 106px; border-radius: 6px 6px 6px 6px "></a>
+                                                </div>
+
+
+                                            </div>
+                                        </div>`
+
+
+                                        codeBlock += item;
+
+                                    }
+                                    document.getElementById("search-wrapper").innerHTML = codeBlock;
+
+                                }
+
+
+                            }
+
+
+                        })
+
+
+                } else {
+                    document.getElementById("search-wrapper").style.visibility = "hidden";
+                    document.getElementById("list-wrapper").style.visibility = "visible";
+                }
+
+
+            })
+
+
+        })
+    </script>
+
+
+
+
+
+{% endblock %}

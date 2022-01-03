@@ -1,0 +1,225 @@
+{% extends 'home/base.html' %}
+{% load static %}
+
+{% block body %}
+    <style>
+        .img-fluid {
+
+            height: auto;
+            margin-left: 22%;
+            width: 60%;
+        }
+    </style>
+    <script src="{% static 'assets/js/token/token.js' %}"></script>
+    <main>
+        <!--? slider Area Start-->
+        <section class="slider-area slider-area2">
+            <div class="slider-active">
+                <!-- Single Slider -->
+                <div class="single-slider slider-height2">
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-xl-8 col-lg-11 col-md-12">
+                                <div class="hero__caption hero__caption2">
+                                    <h1 data-animation="bounceIn" data-delay="0.2s">Blog Detail </h1>
+                                    <!-- breadcrumb Start-->
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb">
+                                            <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                                            <li class="breadcrumb-item"><a href="{% url 'blog' %}">Blog</a></li>
+                                        </ol>
+                                    </nav>
+                                    <!-- breadcrumb End -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!--? Blog Area Start -->
+
+        <section class="blog_area single-post-area section-padding">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12 posts-list">
+
+
+                        <div class="single-post" id="single_detail">
+
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <!-- Blog Area End -->
+
+        <!-- Modal -->
+        <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Blog Delete Confimation</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete ? Once it's done it can't be undone !!
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                        <button type="button" class="btn btn-primary" id="blog_delete">Yes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+
+    <!-- Yo talako 'Detail' Related script ho -->
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+            var url = "{% url 'post_detail' post.id %}"
+
+            /* Fetch API Call to the url */
+            fetch(url,
+                {
+                    method: 'GET',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                    headers: {
+                        Authorization: localStorage.getItem('access_token')
+                            ? 'JWT ' + localStorage.getItem('access_token')
+                            : null,
+
+                        'Content-type': 'application/json',
+                    },
+
+                }).then((response) => {                                                          /* Response(in json) and stauts lyauni tarika */
+                status = response.status;
+                return response.json()
+            })
+                .then(function (data) {
+
+
+                    if (parseInt(status) == 200) {
+                        //console.log(data)
+                        var list = data                 /* list vanni js variable, yo variable ms chai JSON Object format ko data cha*/
+
+
+                        var item = `<div class="feature-img">
+                                <img class="img-fluid" src="${list.image}" alt="Blog_Image" width="650">
+                            </div>
+                            <div class="blog_details">
+                                <h2 style="color: #2d2d2d;">${list.title}</h2>
+                                <ul class="blog-info-link mt-3 mb-4">
+                                    <li><a href="#"><i class="fa fa-user"></i> {{post.author }}, {{post.category}}
+                                    </a>
+                                    </li>
+
+                                    <div class="float-right">
+                                        <li class=""><a href="{% url 'edit_blog' post.id %}"><i class="fa fa-edit fa-5x" style="color: #FF9F67"></i>Edit</a>
+                                        </li>
+                                        <li class=""><a href="#" data-toggle="modal" data-target="#exampleModal"><i
+                                                class="fa fa-trash" style="color: red"></i>Delete</a>
+                                        </li>
+                                    </div>
+                                </ul>
+
+                                <p class="text-justify">
+                                    ${list.excerpt}
+                                </p>
+                                <p class="text-justify">
+                                    ${list.content}
+                                </p>
+                                <div class="quote-wrapper">
+                                    <div class="quotes">
+                                         ${list.excerpt}
+                                    </div>
+                                </div>
+                            </div>`
+
+                        $("#single_detail").append($(item));
+
+                    } else {
+                        window.location.replace("{% url 'home' %}")
+                    }
+
+
+                })
+
+
+        });
+
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- Yo talako script 'DELETE' Method ko Script ho -->
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+            var csrftoken = getToken('csrftoken');
+
+            var del_button = document.getElementById('blog_delete')
+
+            del_button.addEventListener('click', function (e)		                 /* form ko submit ma kasaile click gareko cha vani, yo talako definition part run hune*/ {
+
+                e.preventDefault()
+
+                console.log('Delete button clicked')
+
+
+                var url = "{% url 'delete_post' post.id %}"
+
+                /* Fetch API Call to the url */
+                fetch(url,
+                    {
+                        method: 'DELETE',				/* yo url ma hit hanne method vaneko chai POST method ho vanna khojeko*/
+                        headers: {
+                            Authorization: localStorage.getItem('access_token')
+                                ? 'JWT ' + localStorage.getItem('access_token')
+                                : null,
+                            'X-CSRFToken': csrftoken,
+                            'Content-type': 'application/json'         /*yedi APIView class le json response matrai pathauncha vanera fix cha vani yo 'Content-type': 'application/json' lekhne */
+                        }
+                    })
+                    .then(function (data)		                             /* django ko taskCreate() vanni view le response pathaye pachi yo function call huncha*/ {
+                        window.location.replace("{% url 'blog' %}")
+                    })
+
+            })
+
+        });
+
+    </script>
+
+
+
+{% endblock %}
+
+
+
+
+
